@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Perfil - Fusion RPG</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .perfil {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      width: 400px;
+      box-shadow: 0 0 20px rgba(166, 78, 255, 0.3);
+      text-align: center;
+    }
+
+    #avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: #a64eff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #842aff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Meu Perfil</h1>
+
+  <div class="perfil" id="perfil">
+    <p>Você ainda não vinculou sua conta do Discord.</p>
+    <button class="btn" onclick="vincularDiscord()">Vincular-se ao seu Discord</button>
+  </div>
+
+  <script>
+    function getQueryParams() {
+      const params = {};
+      window.location.hash.substring(1).split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        params[key] = decodeURIComponent(value);
+      });
+      return params;
+    }
+
+    async function buscarPerfil(token) {
+      const response = await fetch("https://discord.com/api/users/@me", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      const perfilDiv = document.getElementById("perfil");
+      perfilDiv.innerHTML = `
+        <img src="https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png" id="avatar">
+        <p><strong>Nome:</strong> ${data.username}#${data.discriminator}</p>
+        <p><strong>ID:</strong> ${data.id}</p>
+      `;
+    }
+
+    function vincularDiscord() {
+      const clientId = "SEU_CLIENT_ID";
+      const redirectUri = window.location.href.split('#')[0];
+      const scope = "identify";
+      const responseType = "token";
+      window.location.href =
+        `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${scope}`;
+    }
+
+    // Se o token já veio na URL
+    const params = getQueryParams();
+    if (params.access_token) {
+      buscarPerfil(params.access_token);
+    }
+  </script>
+
+</body>
+</html>
